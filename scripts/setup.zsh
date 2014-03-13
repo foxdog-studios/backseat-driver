@@ -10,6 +10,8 @@ setopt NO_UNSET
 
 repo=$(realpath -- ${0:h}/..)
 
+env=$repo/env
+
 global_node_packages=(
     meteorite
 )
@@ -17,6 +19,7 @@ global_node_packages=(
 pacman_packages=(
     git
     nodejs
+    python2-virtualenv
     zsh
 )
 
@@ -46,6 +49,21 @@ function install_meteorite_packages()
     mrt install
 )}
 
+function create_ve()
+{
+    virtualenv-2.7 $env
+}
+
+function install_python_packages()
+{(
+    unsetopt no_unset
+    source $env/bin/activate
+    set no_unset
+
+    pip install git+https://github.com/foxdog-studios/pyddp.git
+    pip install --requirement $repo/requirements.txt
+)}
+
 function init_local()
 {
     local config_dir=$repo/local/config
@@ -72,6 +90,8 @@ function init_local()
 
 tasks=(
     install_pacman_packages
+    create_ve
+    install_python_packages
     install_meteor
     install_global_node_packages
     install_meteorite_packages
@@ -90,6 +110,8 @@ function usage()
 		Tasks:
 
 		    install_pacman_packages
+		    create_ve
+		    install_python_packages
 		    install_meteor
 		    install_global_node_packages
 		    init_local

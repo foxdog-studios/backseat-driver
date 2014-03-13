@@ -33,6 +33,21 @@ function install_pacman_packages()
     sudo pacman --noconfirm --sync --needed --refresh $pacman_packages
 }
 
+function create_ve()
+{
+    virtualenv-2.7 $env
+}
+
+function install_python_packages()
+{(
+    unsetopt NO_UNSET
+    source $env/bin/activate
+    set NO_UNSET
+
+    pip install git+https://github.com/foxdog-studios/pyddp.git
+    pip install --requirement $repo/requirement.txt
+)}
+
 function install_meteor()
 {
    curl https://install.meteor.com/ | sh
@@ -47,21 +62,6 @@ function install_meteorite_packages()
 {(
     cd $repo/meteor
     mrt install
-)}
-
-function create_ve()
-{
-    virtualenv-2.7 $env
-}
-
-function install_python_packages()
-{(
-    unsetopt no_unset
-    source $env/bin/activate
-    set no_unset
-
-    pip install git+https://github.com/foxdog-studios/pyddp.git
-    pip install --requirement $repo/requirements.txt
 )}
 
 function init_local()
@@ -80,7 +80,6 @@ function init_local()
     if [[ ! -e $target ]]; then
         ln --force --symbolic $dev_dir:t $target
     fi
-
 }
 
 

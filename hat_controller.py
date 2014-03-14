@@ -74,7 +74,7 @@ def main():
     hat_controller = None
 
     try:
-        print 'Connection to Arduino board...'
+        print 'Connecting to Arduino board...'
         board = Arduino(args.device)
 
         print 'Connecting to DDP server...'

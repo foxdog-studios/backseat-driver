@@ -12,6 +12,11 @@ you're using a Window system, install [Ubuntu](http://www.ubuntu.com/desktop),
 then follow the instructions below. If you're using another system, try the
 instructions below and let me know how it goes.
 
+This has been tested with an Arduino Uno with StandardFirmata installed. To
+install StandardFirmata using the Arduino IDE, go to `File -> Examples ->
+Firmata -> StandardFirmata`.
+
+
 1.  Ensure you have the following programs installed. You may use your system's
     package manager (preferred) of retrieve them from the Web.
 
@@ -72,7 +77,7 @@ Running
 
     ```shell
     $ . venv/bin/activate
-    $ python hat_controller $DEVICE_PATH
+    $ python hat_controller.py $DEVICE_PATH
     ```
 
     from the root of the repository. Replace `$DEVICE_PATH` with the path you

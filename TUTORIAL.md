@@ -122,7 +122,7 @@ Now you should see a button that says the party is off in the browser.
 We should change that.
 
 
-## Colletions
+## Collections
 
 Meteor has a mongodb built in to it, no need to install. It is available on the
 client too (as minimongo, a mini stripped-down version of mongo).

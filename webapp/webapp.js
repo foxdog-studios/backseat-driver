@@ -23,13 +23,16 @@ var setHatState = function (isActivated) {
 
 if (Meteor.isClient) {
   Template.controller.helpers({
+    active: function () {
+      return isHatActivated() ? 'active' : null;
+    },
     buttonSuffix: function () {
-      return isHatActivated() ? 'off' : 'on';
+      return isHatActivated() ? 'on' : 'off';
     }
   });
 
   Template.controller.events({
-    'click #led': function (event) {
+    'click #party-hat': function (event) {
       event.preventDefault();
       if (isHatActivated()) {
         Meteor.call('deactivateHat');

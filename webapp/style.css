@@ -1,0 +1,15 @@
+.active {
+  background-color: #0f0;
+}
+
+button {
+  font-size: 30px;
+  font-size: 16vw;
+  position: absolute;
+  top: 0px;
+  right: 0px;
+  bottom: 0px;
+  left: 0px;
+  width: 100%;
+}
+

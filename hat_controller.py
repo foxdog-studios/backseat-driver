@@ -14,14 +14,12 @@ class HatController(object):
         )
 
         self._board = board
-        self._id = None
         self._is_activated = False
         self._is_ready = False
 
     def _recieved_message(self, message):
         hat = u'hat'
         is_activated = u'isActivated'
-        name = u'name'
 
         if isinstance(message, ddp.ReadyMessage):
             self._is_ready = True
@@ -29,13 +27,12 @@ class HatController(object):
 
         elif isinstance(message, ddp.AddedMessage):
             fields = message.fields
-            if fields.get(name) == hat:
-                self._id = message.id_
+            if message.id_ == hat:
                 self._set_hat_state(fields.get(is_activated, False))
 
         elif isinstance(message, ddp.ChangedMessage):
             fields = message.fields
-            if message.id_ == self._id and is_activated in fields:
+            if message.id_ == hat and is_activated in fields:
                 self._set_hat_state(fields[is_activated])
 
 
@@ -56,8 +53,6 @@ class HatController(object):
 
     def connect(self):
         self._conn.connect()
-        msg = ddp.SubMessage('1', 'hat')
-        self._conn.send(msg)
 
     def disconnect(self):
         self._conn.disconnect()

@@ -2,29 +2,32 @@ var HAT = 'hat';
 
 var Devices = new Meteor.Collection('devices');
 
-Meteor.methods({
-  'activateHat': function () {
-    setHatState(true);
-  },
-
-  'deactivateHat': function () {
-    setHatState(false);
+if (Meteor.isServer) {
+  if (Devices.find().count() === 0) {
+    Devices.insert({
+      _id: HAT,
+      isActivated: false
+    });
   }
-});
-
-var setHatState = function (isActivated) {
-  Devices.upsert({
-    name: HAT
-  }, {
-    name: HAT,
-    isActivated: isActivated
-  });
-};
+}
 
 if (Meteor.isClient) {
+  var setHatState = function (isActivated) {
+    Devices.update(HAT, {
+      isActivated: isActivated
+    });
+  };
+
+  var isHatActivated = function () {
+    var hat = Devices.findOne(HAT);
+    return hat && hat.isActivated;
+  };
+
   Template.controller.helpers({
     active: function () {
-      return isHatActivated() ? 'active' : null;
+      if (isHatActivated()) {
+        return 'active';
+      }
     },
     buttonSuffix: function () {
       return isHatActivated() ? 'on' : 'off';
@@ -34,16 +37,8 @@ if (Meteor.isClient) {
   Template.controller.events({
     'click #party-hat': function (event) {
       event.preventDefault();
-      if (isHatActivated()) {
-        Meteor.call('deactivateHat');
-      } else {
-        Meteor.call('activateHat');
-      }
+      setHatState(!isHatActivated());
     }
   });
-
-  var isHatActivated = function () {
-    var hat = Devices.findOne({ name: HAT });
-    return hat && hat.isActivated;
-  };
 }
+

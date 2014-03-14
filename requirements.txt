@@ -1,2 +1,4 @@
+pyFirmata==0.9.5
 pyddp==0.0.0
+pyserial==2.7
 ws4py==0.3.2

@@ -45,7 +45,7 @@ function install_python_packages()
     set NO_UNSET
 
     pip install git+https://github.com/foxdog-studios/pyddp.git
-    pip install --requirement $repo/requirement.txt
+    pip install --requirement $repo/requirements.txt
 )}
 
 function install_meteor()

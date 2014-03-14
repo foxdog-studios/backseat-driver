@@ -49,15 +49,18 @@ class HatController(object):
         if isinstance(message, ddp.ReadyMessage):
             self._is_ready = True
             self._set_hat_state(self._is_activated)
+
         elif isinstance(message, ddp.AddedMessage):
             fields = message.fields
             if fields.get(name) == hat:
                 self._id = message.id_
                 self._set_hat_state(fields.get(is_activated, False))
+
         elif isinstance(message, ddp.ChangedMessage):
             fields = message.fields
             if message.id_ == self._id and is_activated in fields:
                 self._set_hat_state(fields[is_activated])
+
         else:
             logger.debug('Ignoring message: %s', message)
 

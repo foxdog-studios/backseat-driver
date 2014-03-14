@@ -45,9 +45,8 @@ Firmata -> StandardFirmata`.
     $ cd party-hat
     ```
 
-5.  Run the setup script. This will install Meteor and Meteorite, create a
-    Python 2.7 virtual environment and install the required Python packages.
-    *You may be prompted for your password by `sudo`.*
+5.  Run the setup script. This will install Meteor, create a Python 2.7 virtual
+    environment and install the required Python packages.
 
     ```shell
     $ ./setup.sh
@@ -60,7 +59,7 @@ Running
 
     ```shell
     $ cd webapp
-    $ mrt
+    $ meteor
     ```
 
     from the root of the repository.

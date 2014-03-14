@@ -5,10 +5,17 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="mobile-web-app-capable" content="yes">
   <link rel="shortcut icon" sizes="196x196" href="shortcut-icon.png">
-  <title>Backseat Driver</title>
+  <title>Party hat</title>
 </head>
 
 <body>
   {{> controller}}
 </body>
+
+<template name="controller">
+  <label>
+    LED
+    <button id="led">Turn {{buttonSuffix}}</button>
+  </label>
+</template>
 

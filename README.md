@@ -1,7 +1,7 @@
-Backseat Driver
-===============
+Party hat
+=========
 
-Crowd controlled car
+A Web-enabled party hat.
 
 
 Setup
@@ -12,8 +12,8 @@ you're using a Window system, install [Ubuntu](http://www.ubuntu.com/desktop),
 then follow the instructions below. If you're using another system, try the
 instructions below and let me know how it goes.
 
-1.  Ensure you have the following programs installed using your system's package
-    manager (preferred) or by retrieving them from the Web.
+1.  Ensure you have the following programs installed. You may use your system's
+    package manager (preferred) of retrieve them from the Web.
 
     * A POSIX compliant shell, e.g., bash (you almost certainly have one
       already).
@@ -28,16 +28,16 @@ instructions below and let me know how it goes.
     * [virtualenv](http://www.virtualenv.org/en/latest/) for Python 2.7
 
 
-2.  Clone the Backseat Driver repository.
+2.  Clone the Party hat repository.
 
     ```shell
-    $ git clone https://github.com/foxdog-studios/backseat-driver.git
+    $ git clone https://github.com/foxdog-studios/party-hat.git
     ```
 
 3.  Change your working directory to be the repository.
 
     ```shell
-    $ cd backseat-driver
+    $ cd party-hat
     ```
 
 5.  Run the setup script. This will install Meteor and Meteorite, create a
@@ -51,24 +51,24 @@ instructions below and let me know how it goes.
 Running
 -------
 
-1. To launch the Meteor site, run;
+1. Launch the controller website by running;
 
     ```shell
-    $ cd meteor
+    $ cd webapp
     $ mrt
     ```
 
     from the root of the repository.
 
-2. Connect a Arduino board to your system and find it's device path. On my
-   system, this can be done with;
+2. Connect an Arduino board to your system and find it's device path. On my
+   system, this can be done by running;
 
    ```shell
    $ ls /dev/ttyACM*
    /dev/ttyACM0
    ```
 
-3. To launch the hat controller, run;
+3. Launch the hat controller by run;
 
     ```shell
     $ . venv/bin/activate

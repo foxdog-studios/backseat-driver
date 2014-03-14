@@ -72,7 +72,7 @@ Running
 
     ```shell
     $ . venv/bin/activate
-    $ python hat_controller $DEVICE_PATH
+    $ python hat_controller.py $DEVICE_PATH
     ```
 
     from the root of the repository. Replace `$DEVICE_PATH` with the path you

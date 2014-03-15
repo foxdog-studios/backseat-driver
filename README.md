@@ -3,6 +3,12 @@ Party hat
 
 A Web-enabled party hat.
 
+An example of a [meteor](http://meteor.com) app that connects to an
+[Arduino](http://arduino.cc). Originally created for
+a workshop at the [Numbers That Matter hackathon](http://numbersmatter.info/).
+
+- [Video demo](https://vine.co/v/MbDVpzlLOvY)
+
 
 Setup
 -----

@@ -59,9 +59,12 @@ class HatController(object):
 
 
 def main():
-    parser = ArgumentParser()
-    parser.add_argument('-s', '--server', default='127.0.0.1:3000')
-    parser.add_argument('device')
+    parser = ArgumentParser(
+        description='Bridge connecting Arduino and hat webapp')
+    parser.add_argument('-s', '--server', default='127.0.0.1:3000',
+                        help='Server the webapp is running on')
+    parser.add_argument('device',
+                        help='Path to Arduino device, e.g., /dev/tty/ACM0')
     args = parser.parse_args()
 
     url = ddp.ServerUrl(args.server)

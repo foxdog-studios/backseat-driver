@@ -1,8 +1,19 @@
-var HAT = 'hat';
+//
+// Client & Server
+//
 
-var Devices = new Meteor.Collection('devices');
+HAT = 'hat';
+
+Devices = new Meteor.Collection('devices');
+
+
+//
+// Server only
+//
 
 if (Meteor.isServer) {
+  // Bootstrap collection with a device if there are
+  // none in there already.
   if (Devices.find().count() === 0) {
     Devices.insert({
       _id: HAT,
@@ -10,6 +21,11 @@ if (Meteor.isServer) {
     });
   }
 }
+
+
+//
+// Client only
+//
 
 if (Meteor.isClient) {
   var setHatState = function (isActivated) {

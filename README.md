@@ -3,6 +3,9 @@ Party hat
 
 A Web-enabled party hat.
 
+![A partying
+duck](https://raw.github.com/foxdog-studios/party-hat/master/webapp/public/shortcut-icon.png)
+
 An example of a [meteor](http://meteor.com) app that connects to an
 [Arduino](http://arduino.cc). Originally created for
 a workshop at the [Numbers That Matter hackathon](http://numbersmatter.info/).

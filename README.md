@@ -13,8 +13,21 @@ a workshop at the [Numbers That Matter hackathon](http://numbersmatter.info/).
 - [Video demo](https://vine.co/v/MbDVpzlLOvY)
 
 
-Setup
------
+Branches
+--------
+
+### master
+
+This branch is as vanilla as possible and should work on most \*nix systems.
+
+
+### fds
+
+This branch contains extras biased towards the way we work at Foxdog Studios.
+
+
+Set up
+------
 
 If you're using a Linux based or OSX system, follow the instructions below. If
 you're using a Window system, install [Ubuntu](http://www.ubuntu.com/desktop),

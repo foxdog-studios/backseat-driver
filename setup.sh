@@ -11,6 +11,5 @@ virtualenv --python=python2.7 venv
 . venv/bin/activate
 
 # Install the required Python packages
-pip install git+https://github.com/foxdog-studios/pyddp.git
 pip install --requirement requirements.txt
 

@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 # Change the working directory to be the root of the repository
-cd "$(dirname "$0")"
+cd "$(dirname "$0")/.."
 
 # Install Meteor
 curl https://install.meteor.com/ | sh

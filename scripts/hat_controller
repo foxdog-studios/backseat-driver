@@ -1,0 +1,14 @@
+#!/usr/bin/env zsh
+
+setopt ERR_EXIT
+setopt NO_UNSET
+setopt PIPE_FAIL
+
+root=$0:A:h:h
+
+unsetopt NO_UNSET
+source $root/local/venv/bin/activate
+setopt NO_UNSET
+
+exec python $root/hat_controller.py $@
+

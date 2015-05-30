@@ -1,0 +1,101 @@
+#!/usr/bin/env zsh
+
+setopt ERR_EXIT
+setopt NO_UNSET
+setopt PIPE_FAIL
+
+if (( $+VIRTUAL_ENV )); then
+    path=( "${(@)path:#$VIRTUAL_ENV/bin}" )
+    unset $VIRTUAL_ENV
+fi
+
+
+# ==============================================================================
+# = Configuration                                                              =
+# ==============================================================================
+
+root=$0:A:h:h
+
+venv=$root/local/venv
+
+pacman_packages=(
+    git
+    python2-virtualenv
+    zsh
+)
+
+
+# ==============================================================================
+# = Tasks                                                                      =
+# ==============================================================================
+
+function install_pacman_packages()
+{
+    sudo pacman --noconfirm --sync --needed --refresh $pacman_packages
+}
+
+function install_meteor()
+{
+    if (( ! $+commands[meteor] )); then
+        curl https://install.meteor.com | /usr/bin/bash
+    fi
+}
+
+function create_virtualenv()
+{
+    virtualenv-2.7 $venv
+}
+
+function install_python_packages()
+{
+    setopt LOCAL_OPTIONS
+
+    unsetopt NO_UNSET
+    source $venv/bin/activate
+    setopt NO_UNSET
+
+    pip install --requirement $root/requirements.txt
+}
+
+
+# ==============================================================================
+# = Command line interface                                                     =
+# ==============================================================================
+
+tasks=(
+    install_pacman_packages
+    install_meteor
+    create_virtualenv
+    install_python_packages
+)
+
+function usage()
+{
+    cat <<-'EOF'
+		Set up a development environment
+
+		Usage:
+
+		    setup [TASK...]
+
+		Tasks:
+
+		    install_pacman_packages
+		    install_meteor
+		    create_virtualenv
+		    install_python_packages
+	EOF
+    exit 1
+}
+
+for task in $@; do
+    if (( ${tasks[(i)$task]} > ${#tasks} )); then
+        usage
+    fi
+done
+
+for task in ${@:-$tasks}; do
+    print -P -- "%F{green}Task: $task%f"
+    $task
+done
+

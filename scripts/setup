@@ -20,7 +20,7 @@ venv=$root/local/venv
 
 pacman_packages=(
     git
-    python2-virtualenv
+    python-virtualenv
     zsh
 )
 
@@ -43,7 +43,7 @@ function install_meteor()
 
 function create_virtualenv()
 {
-    virtualenv-2.7 $venv
+    virtualenv $venv
 }
 
 function install_python_packages()

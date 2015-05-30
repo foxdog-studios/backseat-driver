@@ -1,109 +1,94 @@
-from argparse import ArgumentParser
-import time
+#!/usr/bin/env python
 
-import ddp
+import signal
+import threading
+import time
+from argparse import ArgumentParser
+from contextlib import contextmanager
+from functools import wraps
+from pathlib import Path
+
+from MeteorClient import MeteorClient
 
 from pyfirmata import Arduino
 
 
-class HatController(object):
-    def __init__(self, url, board):
-        self._conn = ddp.DdpConnection(
-            url,
-            received_message_callback=self._recieved_message,
-        )
-
-        self._board = board
-        self._is_activated = False
-        self._is_ready = False
-
-    def _recieved_message(self, message):
-        hat = u'hat'
-        is_activated = u'isActivated'
-
-        if isinstance(message, ddp.ReadyMessage):
-            self._is_ready = True
-            self._set_hat_state(self._is_activated)
-
-        elif isinstance(message, ddp.AddedMessage):
-            fields = message.fields
-            if message.id_ == hat:
-                self._set_hat_state(fields.get(is_activated, False))
-
-        elif isinstance(message, ddp.ChangedMessage):
-            fields = message.fields
-            if message.id_ == hat and is_activated in fields:
-                self._set_hat_state(fields[is_activated])
-
-
-    def _set_hat_state(self, is_activated):
-        if self._is_activated == is_activated:
-            return
-        self._is_activated = is_activated
-
-        if self._is_activated:
-            self._write(1)
-            print 'Hat activated'
-        else:
-            self._write(0)
-            print 'Hat deactivated'
-
-    def _write(self, value):
-        self._board.digital[13].write(value)
-
-    def connect(self):
-        self._conn.connect()
-
-    def disconnect(self):
-        self._conn.disconnect()
-
-
 def main():
-    parser = ArgumentParser(
-        description='Bridge connecting Arduino and hat webapp')
-    parser.add_argument('-s', '--server', default='127.0.0.1:3000',
-                        help='Server the webapp is running on')
-    parser.add_argument('device',
-                        help='Path to Arduino device, e.g., /dev/tty/ACM0')
+    parser = ArgumentParser()
+    parser.add_argument('-d', '--device', default='hat', dest='device_id')
+    parser.add_argument('-p', '--port', default='/dev/ttyACM0',
+                        dest='port_path', type=Path)
+    parser.add_argument('-u', '--url', default='ws://127.0.0.1:3000/websocket')
     args = parser.parse_args()
 
-    url = ddp.ServerUrl(args.server)
+    is_stopping = False
+
+    def stop(signum, frame):
+        nonlocal is_stopping
+        is_stopping = True
+
+    for signum in [signal.SIGINT, signal.SIGTERM]:
+        signal.signal(signum, stop)
+
+    def only_device(func):
+        @wraps(func)
+        def wrapper(collection, id_, *args):
+            if collection == 'devices' or id_ == args.device_id:
+                return func(collection, id_, *args)
+        return wrapper
+
+    @only_device
+    def added_or_changed(collection, id_, fields, *args):
+        set_activated(fields.get('isActivated', False))
+
+    @only_device
+    def removed(collection, id_):
+        set_activated(False)
+
+    lock = threading.Lock()
     board = None
-    hat_controller = None
 
-    try:
-        print 'Connecting to Arduino board...'
-        board = Arduino(args.device)
+    def set_activated(is_activated):
+        with lock:
+            if board is not None:
+                value = 1 if is_activated else 0
+                board.digital[9].write(value)
 
-        print 'Connecting to DDP server...'
-        hat_controller = HatController(url, board)
+    print('Press ^C to exit')
 
-        hat_controller.connect()
-        wait_for_user_to_exit()
-    finally:
-        if hat_controller is not None:
-            try:
-                hat_controller.disconnect()
-            except:
-                print (
-                    'An error occurred while disconnecting from the DDP '
-                    'server.'
-                )
-
-        if board is not None:
-            try:
-                board.exit()
-            except:
-                print 'An error occurred while exiting from the Arduino board.'
+    with create_board(args.port_path) as board_tmp:
+        with lock:
+            board = board_tmp
+        with create_client(args.url) as client:
+            client.on('added', added_or_changed)
+            client.on('changed', added_or_changed)
+            client.on('removed', removed)
+            with subscription(client, 'device', params=[args.device_id]):
+                while not is_stopping:
+                    time.sleep(1)
+        set_activated(False)
 
 
-def wait_for_user_to_exit():
-    try:
-        print 'Press ^C to exit'
-        while True:
-            time.sleep(0.5)
-    except KeyboardInterrupt:
-        pass
+@contextmanager
+def create_board(port_path):
+    board = Arduino(str(port_path))
+    yield board
+    board.exit()
+
+
+@contextmanager
+def create_client(url):
+    client = MeteorClient(url)
+    client.connect()
+    yield client
+    client.close()
+
+
+@contextmanager
+def subscription(client, name, *args, **kwargs):
+    client.subscribe(name, *args, **kwargs)
+    yield
+    client.unsubscribe(name)
 
 
 if __name__ == '__main__':

@@ -1,14 +1,18 @@
 <template name="Controller">
-  {{#if Template.subscriptionsReady}}
-    {{#if hasDevice}}
-      <button id="party-hat" class="{{buttonClass}}">
-        Party is {{buttonSuffix}}
-      </button>
+  {{#if status.connected}}
+    {{#if Template.subscriptionsReady}}
+      {{#if hasDevice}}
+        <button id="party-hat" class="{{buttonClass}}">
+          Party is {{buttonSuffix}}
+        </button>
+      {{else}}
+        <p>Cannot find device with ID "{{deviceId}}".</p>
+      {{/if}}
     {{else}}
-      <p>Cannot find device with ID "{{deviceId}}".</p>
+      <p>Loading&hellip;</p>
     {{/if}}
   {{else}}
-    <p>Loading&hellip;</p>
+    <p>Trying to connect to server ({{status.status}}).</p>
   {{/if}}
 </template>
 

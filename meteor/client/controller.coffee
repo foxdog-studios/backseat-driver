@@ -13,9 +13,11 @@ Template.Controller.helpers
   buttonSuffix: ->
     if isDeviceActivated(this) then 'on' else 'off'
 
-
   hasDevice: ->
     share.Devices.find(@deviceId).count() != 0
+
+  status: ->
+    Meteor.status()
 
 
 Template.Controller.events

@@ -37,28 +37,45 @@ def main():
                 return func(collection, id_, *args)
         return wrapper
 
+    is_active = False
+    pulse_width = 0
+
     @only_device
     def added_or_changed(collection, id_, fields, *args):
-        set_activated(fields.get('isActivated', False))
+        nonlocal is_active
+        nonlocal pulse_width
+        dirty = False
+        if 'isActivated' in fields:
+            is_active = fields['isActivated']
+            dirty = True
+        if 'pulseWidth' in fields:
+            pulse_width = fields['pulseWidth']
+            dirty = True
+        if dirty:
+            write_pulse_width()
 
     @only_device
     def removed(collection, id_):
-        set_activated(False)
+        nonlocal is_active
+        nonlocal pulse_width
+        is_active = False
+        pulse_width = 0.0
+        write_pulse_width()
 
     lock = threading.Lock()
-    board = None
+    pin = None
 
-    def set_activated(is_activated):
+    def write_pulse_width():
         with lock:
-            if board is not None:
-                value = 1 if is_activated else 0
-                board.digital[9].write(value)
+            if pin is not None:
+                pin.write(pulse_width if is_active else 0)
 
     print('Press ^C to exit')
 
-    with create_board(args.port_path) as board_tmp:
+    with create_board(args.port_path) as board:
+        pin_tmp = board.get_pin('d:9:p')
         with lock:
-            board = board_tmp
+            pin = pin_tmp
         with create_client(args.url) as client:
             client.on('added', added_or_changed)
             client.on('changed', added_or_changed)
@@ -66,7 +83,7 @@ def main():
             with subscription(client, 'device', params=[args.device_id]):
                 while not is_stopping:
                     time.sleep(1)
-        set_activated(False)
+        write_pulse_width(0.0)
 
 
 @contextmanager

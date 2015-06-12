@@ -28,6 +28,11 @@ Template.Controller.events
       event.target.disabled = false
       console.log error if error?
 
+  'input #pulse-width': (event, template) ->
+    deviceId = template.data.deviceId
+    pulseWidth = parseFloat event.target.value
+    Meteor.call 'setPulseWidth', deviceId, pulseWidth
+
 
 isDeviceActivated = (data) ->
   share.Devices.findOne(data.deviceId).isActivated

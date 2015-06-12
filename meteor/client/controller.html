@@ -5,6 +5,7 @@
         <button id="party-hat" class="{{buttonClass}}">
           Party is {{buttonSuffix}}
         </button>
+        <input id="pulse-width" type="range" min="0" max="0.5" step="0.01">
       {{else}}
         <p>Cannot find device with ID "{{deviceId}}".</p>
       {{/if}}

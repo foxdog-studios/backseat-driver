@@ -38,15 +38,20 @@ def main():
         return wrapper
 
     is_active = False
+    is_first = False
     pulse_width = 0
 
     @only_device
     def added_or_changed(collection, id_, fields, *args):
+        nonlocal is_first
         nonlocal is_active
         nonlocal pulse_width
         dirty = False
         if 'isActivated' in fields:
+            old_is_active = is_active
             is_active = fields['isActivated']
+            if not old_is_active and is_active:
+                is_first = True
             dirty = True
         if 'pulseWidth' in fields:
             pulse_width = fields['pulseWidth']
@@ -66,9 +71,18 @@ def main():
     pin = None
 
     def write_pulse_width():
+        nonlocal is_first
         with lock:
-            if pin is not None:
-                pin.write(pulse_width if is_active else 0)
+            if pin is None:
+                return
+            if is_active:
+                if is_first:
+                    is_first = False
+                    pin.write(1)
+                    time.sleep(0.05)
+                pin.write(pulse_width)
+            else:
+                pin.write(0)
 
     print('Press ^C to exit')
 
@@ -83,7 +97,8 @@ def main():
             with subscription(client, 'device', params=[args.device_id]):
                 while not is_stopping:
                     time.sleep(1)
-        write_pulse_width(0.0)
+        pulse_width = 0.0
+        write_pulse_width()
 
 
 @contextmanager

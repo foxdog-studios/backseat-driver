@@ -1,19 +1,4 @@
 <template name="Controller">
-  {{#if status.connected}}
-    {{#if Template.subscriptionsReady}}
-      {{#if hasDevice}}
-        <button id="party-hat" class="{{buttonClass}}">
-          Party is {{buttonSuffix}}
-        </button>
-        <input id="pulse-width" type="range" min="0" max="0.5" step="0.01">
-      {{else}}
-        <p>Cannot find device with ID "{{deviceId}}".</p>
-      {{/if}}
-    {{else}}
-      <p>Loading&hellip;</p>
-    {{/if}}
-  {{else}}
-    <p>Trying to connect to server ({{status.status}}).</p>
-  {{/if}}
+  <canvas></canvas>
 </template>
 

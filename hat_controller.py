@@ -97,7 +97,8 @@ def main():
             with subscription(client, 'device', params=[args.device_id]):
                 while not is_stopping:
                     time.sleep(1)
-        pulse_width = 0.0
+        is_active = False
+        pulse_width = 0
         write_pulse_width()
 
 

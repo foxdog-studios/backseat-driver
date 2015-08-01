@@ -16,9 +16,9 @@ from pyfirmata import Arduino
 def main():
     parser = ArgumentParser()
     parser.add_argument('-d', '--device', default='hat', dest='device_id')
-    parser.add_argument('-p', '--port', default='/dev/ttyACM0',
+    parser.add_argument('-p', '--port', default='/dev/partyhat',
                         dest='port_path', type=Path)
-    parser.add_argument('-u', '--url', default='ws://127.0.0.1:3000/websocket')
+    parser.add_argument('-u', '--url', default='ws://127.0.0.1:3002/websocket')
     args = parser.parse_args()
 
     is_stopping = False

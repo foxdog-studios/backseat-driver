@@ -67,23 +67,29 @@ def party_hat_main(received_signal, args):
 @contextmanager
 def create_client(url):
     client = MeteorClient(url)
-    client.connect()
-    yield client
-    client.close()
+    try:
+        client.connect()
+        yield client
+    finally:
+        client.close()
 
 
 @contextmanager
 def on_message(client, message, callback):
-    client.on(message, callback)
-    yield
-    client.remove_listener(message, callback)
+    try:
+        client.on(message, callback)
+        yield
+    finally:
+        client.remove_listener(message, callback)
 
 
 @contextmanager
 def subscription(client, name, *args, **kwargs):
-    client.subscribe(name, *args, **kwargs)
-    yield
-    client.unsubscribe(name)
+    try:
+        client.subscribe(name, *args, **kwargs)
+        yield
+    finally:
+        client.unsubscribe(name)
 
 
 class DeviceChanges:
@@ -141,18 +147,22 @@ class DeviceChanges:
 @contextmanager
 def create_board(port_path):
     board = Arduino(str(port_path))
-    yield board
-    board.exit()
+    try:
+        yield board
+    finally:
+        board.exit()
 
 
 @contextmanager
 def create_pin_manager(board):
     pin_manager = PinManager(board.get_pin('d:9:p'))
     pin_manager.update()
-    yield pin_manager
-    pin_manager.set_is_active(False)
-    pin_manager.set_pulse_width(0.0)
-    pin_manager.update()
+    try:
+        yield pin_manager
+    finally:
+        pin_manager.set_is_active(False)
+        pin_manager.set_pulse_width(0.0)
+        pin_manager.update()
 
 
 class PinManager:
@@ -207,8 +217,10 @@ def flag_signal(received_signal, signum):
     def handler(signum, frame):
         received_signal.set()
     prev_handler = signal.signal(signum, handler)
-    yield
-    signal.signal(signum, prev_handler)
+    try:
+        yield
+    finally:
+        signal.signal(signum, prev_handler)
 
 
 # =============================================================================

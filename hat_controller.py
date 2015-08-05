@@ -1,11 +1,13 @@
 #!/usr/bin/env python
 
+import logging
 import queue as queuelib
 import signal
 import threading
 import time
 import traceback
 from argparse import ArgumentParser
+from collections import OrderedDict
 from contextlib import ExitStack, contextmanager, suppress
 from functools import wraps
 from pathlib import Path
@@ -15,9 +17,27 @@ from MeteorClient import MeteorClient
 from pyfirmata import Arduino
 
 
+LOG_LEVELS = (
+    logging.CRITICAL,
+    logging.ERROR,
+    logging.WARNING,
+    logging.INFO,
+    logging.DEBUG
+)
+
+
+LOG_LEVEL_TO_NAMES = OrderedDict((level, logging.getLevelName(level).lower())
+                                 for level in LOG_LEVELS)
+
+
+LOG_NAME_TO_LEVEL = OrderedDict((name, level)
+                                for level, name in LOG_LEVEL_TO_NAMES.items())
+
+
 def main():
     print('Press ^C to quit')
     args = parse_args()
+    configure_logging(args)
     with flag_signals(signal.SIGINT, signal.SIGTERM) as received_signal:
         while not received_signal.is_set():
             try:
@@ -30,10 +50,21 @@ def main():
 def parse_args():
     parser = ArgumentParser()
     parser.add_argument('-d', '--device', default='hat', dest='device_id')
+    parser.add_argument('-l', '--log-level', choices=LOG_NAME_TO_LEVEL.keys(),
+                        default=LOG_LEVEL_TO_NAMES[logging.INFO])
     parser.add_argument('-p', '--port', default='/dev/partyhat',
                         dest='port_path', type=Path)
     parser.add_argument('-u', '--url', default='ws://127.0.0.1:3002/websocket')
     return parser.parse_args()
+
+
+def configure_logging(args):
+    global logger
+    logging.basicConfig(
+            datefmt='%H:%M:%S',
+            format='[%(levelname).1s %(asctime)s] %(message)s',
+            level=LOG_NAME_TO_LEVEL[args.log_level])
+    logger = logging.getLogger(__name__)
 
 
 def party_hat_main(received_signal, args):
@@ -67,10 +98,12 @@ def party_hat_main(received_signal, args):
 @contextmanager
 def create_client(url):
     client = MeteorClient(url)
+    logger.info('Connecting to Meteor server ...')
     try:
         client.connect()
         yield client
     finally:
+        logger.info('Disconnecting from Meteor server ...')
         client.close()
 
 
@@ -85,6 +118,7 @@ def on_message(client, message, callback):
 
 @contextmanager
 def subscription(client, name, *args, **kwargs):
+    logger.info('Subscribing to %s ...', name)
     try:
         client.subscribe(name, *args, **kwargs)
         yield
@@ -146,20 +180,25 @@ class DeviceChanges:
 
 @contextmanager
 def create_board(port_path):
+    logger.info('Connecting to Arduino on %s ...', port_path)
     board = Arduino(str(port_path))
+    logger.info('Connected to Arduino on %s', port_path)
     try:
         yield board
     finally:
+        logger.info('Disconnecting from Arduino ...')
         board.exit()
 
 
 @contextmanager
 def create_pin_manager(board):
-    pin_manager = PinManager(board.get_pin('d:9:p'))
+    pin_name = 'd:9:p'
+    pin_manager = PinManager(board.get_pin(pin_name))
     pin_manager.update()
     try:
         yield pin_manager
     finally:
+        logger.info('Setting pin %s low ...', pin_name)
         pin_manager.set_is_active(False)
         pin_manager.set_pulse_width(0.0)
         pin_manager.update()
@@ -196,6 +235,7 @@ class PinManager:
                 self._write(0.0)
 
     def _write(self, pulse_width):
+        logger.debug('Writing pulse width %.2f ...', pulse_width)
         self._pin.write(pulse_width)
 
 

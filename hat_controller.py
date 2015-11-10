@@ -193,8 +193,19 @@ def create_board(port_path):
 @contextmanager
 def create_pin_manager(board):
     pin_name = 'd:9:p'
-    pin_manager = PinManager(board.get_pin(pin_name))
+
+    logger.info('Getting pin %s from %s ...', pin_name, board)
+    pin = board.get_pin(pin_name)
+    logger.info('Got pin %s from %s', pin_name, board)
+
+    logger.info('Creating pin manager for %s ...', pin_name)
+    pin_manager = PinManager(pin)
+    logger.info('Created pin manager for %s', pin_name)
+
+    logger.info('Setting pin to default state ...')
     pin_manager.update()
+    logger.info('Set pin to default state')
+
     try:
         yield pin_manager
     finally:
@@ -255,6 +266,7 @@ def flag_signals(*signums):
 @contextmanager
 def flag_signal(received_signal, signum):
     def handler(signum, frame):
+        logger.info('Received signal %d', signum)
         received_signal.set()
     prev_handler = signal.signal(signum, handler)
     try:

@@ -12,9 +12,8 @@ from contextlib import ExitStack, contextmanager, suppress
 from functools import wraps
 from pathlib import Path
 
+import bluetooth
 from MeteorClient import MeteorClient
-
-from pyfirmata import Arduino
 
 
 LOG_LEVELS = (
@@ -42,8 +41,9 @@ def main():
         while not received_signal.is_set():
             try:
                 party_hat_main(received_signal, args)
-            except Exception as error:
-                print(error)
+            except:
+                logger.warning('An error has stopped the main loop',
+                                exc_info=True)
                 time.sleep(1)
 
 
@@ -52,8 +52,11 @@ def parse_args():
     parser.add_argument('-d', '--device', default='hat', dest='device_id')
     parser.add_argument('-l', '--log-level', choices=LOG_NAME_TO_LEVEL.keys(),
                         default=LOG_LEVEL_TO_NAMES[logging.INFO])
-    parser.add_argument('-p', '--port', default='/dev/partyhat',
-                        dest='port_path', type=Path)
+    parser.add_argument(
+        '-b', '--bluetooth_address',
+        default='30:14:11:19:09:71',
+        help='address of the bluetooth device to open a socket to'
+    )
     parser.add_argument('-u', '--url', default='ws://127.0.0.1:3002/websocket')
     return parser.parse_args()
 
@@ -79,8 +82,8 @@ def party_hat_main(received_signal, args):
          on_message(client, 'changed', device_changes.changed), \
          on_message(client, 'removed', device_changes.removed), \
          subscription(client, 'device', params=[args.device_id]), \
-         create_board(args.port_path) as board, \
-         create_pin_manager(board) as pin_manager:
+         create_bluetooth_socket(str(args.bluetooth_address)) as bt_s, \
+         create_pin_manager(bt_s) as pin_manager:
         while not received_signal.is_set() and is_websocket_alive():
             with suppress(queuelib.Empty):
                 changes = queue.get(timeout=1)
@@ -179,28 +182,8 @@ class DeviceChanges:
 # =============================================================================
 
 @contextmanager
-def create_board(port_path):
-    logger.info('Connecting to Arduino on %s ...', port_path)
-    board = Arduino(str(port_path))
-    logger.info('Connected to Arduino on %s', port_path)
-    try:
-        yield board
-    finally:
-        logger.info('Disconnecting from Arduino ...')
-        board.exit()
-
-
-@contextmanager
-def create_pin_manager(board):
-    pin_name = 'd:9:p'
-
-    logger.info('Getting pin %s from %s ...', pin_name, board)
-    pin = board.get_pin(pin_name)
-    logger.info('Got pin %s from %s', pin_name, board)
-
-    logger.info('Creating pin manager for %s ...', pin_name)
-    pin_manager = PinManager(pin)
-    logger.info('Created pin manager for %s', pin_name)
+def create_pin_manager(bluetooth_socket):
+    pin_manager = PinManager(bluetooth_socket)
 
     logger.info('Setting pin to default state ...')
     pin_manager.update()
@@ -209,18 +192,18 @@ def create_pin_manager(board):
     try:
         yield pin_manager
     finally:
-        logger.info('Setting pin %s low ...', pin_name)
+        logger.info('Setting pin to low ...')
         pin_manager.set_is_active(False)
         pin_manager.set_pulse_width(0.0)
         pin_manager.update()
 
 
 class PinManager:
-    def __init__(self, pin):
+    def __init__(self, bluetooth_socket):
         self._dirty = True
         self._is_active = False
         self._just_active = False
-        self._pin = pin
+        self._bluetooth_socket = bluetooth_socket
         self._pulse_width = 0.0
 
     def set_pulse_width(self, pulse_width):
@@ -246,8 +229,29 @@ class PinManager:
                 self._write(0.0)
 
     def _write(self, pulse_width):
-        logger.debug('Writing pulse width %.2f ...', pulse_width)
-        self._pin.write(pulse_width)
+        pw = int(pulse_width * 255)
+        data = chr(int(pw))
+        logger.debug('Writing pulse width: %d with byte value  %s ...',
+                    pw, data)
+        self._bluetooth_socket.send(data)
+
+
+# =============================================================================
+# = Bluetooth                                                                 =
+# =============================================================================
+
+@contextmanager
+def create_bluetooth_socket(address):
+    logger.info('Connecting to bluetooth address %s...', address)
+    socket = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
+    port = 1
+    socket.connect((address, port))
+    logger.info('Bluetooth connected')
+    try:
+        yield socket
+    finally:
+        socket.close()
+        logger.info('Bluetooth disconnected')
 
 
 # =============================================================================

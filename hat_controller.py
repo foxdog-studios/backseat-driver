@@ -53,7 +53,7 @@ def parse_args():
     parser.add_argument('-l', '--log-level', choices=LOG_NAME_TO_LEVEL.keys(),
                         default=LOG_LEVEL_TO_NAMES[logging.INFO])
     parser.add_argument(
-        '-b', '--bluetooth_address',
+        dest='bluetooth_address',
         default='30:14:11:19:09:71',
         help='address of the bluetooth device to open a socket to'
     )

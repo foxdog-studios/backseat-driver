@@ -1,0 +1,11 @@
+[Unit]
+Description=hci
+Wants=bluetooth.target
+After=bluetooth.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/sudo /usr/bin/hciconfig hci0 up
+ExecStop=/usr/bin/sudo /usr/bin/hciconfig hci0 down
+RemainAfterExit=true
+

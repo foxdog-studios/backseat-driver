@@ -13,11 +13,11 @@ root=$0:A:h:h
 
 dst_dir=$HOME/.config/systemd/user
 
-hat_controller_unit=hat_controller.service
-hat_controller_src=$root/systemd/$hat_controller_unit
-hat_controller_dst=$dst_dir/$hat_controller_unit
+partyhat_unit=partyhat.service
+partyhat_src=$root/systemd/$partyhat_unit
+partyhat_dst=$dst_dir/$partyhat_unit
 
-hci_unit=hci_hat_controller.service
+hci_unit=hci.service
 hci_src=$root/systemd/$hci_unit
 hci_dst=$dst_dir/$hci_unit
 
@@ -35,11 +35,11 @@ function action_install()
     # hci.service
     cp -fv $hci_src $hci_dst
 
-    # hat_controller.service
-    template $hat_controller_src \
+    # partyhat.service
+    template $partyhat_src \
              command $root/scripts/hat_controller \
              options "$hat_controller_options" \
-             > $hat_controller_dst
+             > $partyhat_dst
 
     systemctl --user daemon-reload
 }
@@ -53,16 +53,16 @@ function action_start()
     # hci.service
     systemctl --user start $hci_unit
 
-    # hat_controller.service
-    systemctl --user start $hat_controller_unit
+    # partyhat.service
+    systemctl --user start $partyhat_unit
 }
 
 function action_stop()
 {
     print -- 'Stopping...'
 
-    # hat_controller.service
-    systemctl --user stop $hat_controller_unit || true
+    # partyhat.service
+    systemctl --user stop $partyhat_unit || true
 
     # hci.service
     systemctl --user  stop $hci_unit || true
@@ -74,8 +74,8 @@ function action_uninstall()
 {
     print -- 'Uninstalling...'
 
-    # hat_controller.service
-    rm -fv $hat_controller_dst
+    # partyhat.service
+    rm -fv $partyhat_dst
 
     # hci.service
     rm -fv $hci_dst
@@ -112,7 +112,7 @@ function template()
 function usage()
 {
     cat <<-'EOF'
-		Control hat_controller's systemd units
+		Control partyhat's systemd units
 
 		Usage:
 

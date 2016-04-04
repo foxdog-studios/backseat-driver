@@ -57,7 +57,7 @@ def parse_args():
         default='30:14:11:19:09:71',
         help='address of the bluetooth device to open a socket to'
     )
-    parser.add_argument('-u', '--url', default='ws://127.0.0.1:3002/websocket')
+    parser.add_argument('-u', '--url', default='ws://127.0.0.1:3000/websocket')
     return parser.parse_args()
 
 

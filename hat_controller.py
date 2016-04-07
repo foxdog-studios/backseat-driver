@@ -131,7 +131,7 @@ def subscription(client, name, *args, **kwargs):
 
 class DeviceChanges:
     def __init__(self, device_id, queue):
-        self._collection = 'devices'
+        self._collection = 'Devices'
         self._device_id = device_id
         self._queue = queue
 
